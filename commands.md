@@ -13,6 +13,11 @@ Delete a topic
 kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic invoices
 ```
 
+Deleta all topics
+```
+kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic ".*"
+```
+
 List Topics
 ```
 kafka-topics.sh --list --bootstrap-server localhost:9092
@@ -22,7 +27,7 @@ Kafka Consumers
 ---------------
 ```
 kafka-console-consumer.sh --bootstrap-server localhost:9092 \
-        --topic test \
+        --topic subscriptions \
         --from-beginning \
         --formatter kafka.tools.DefaultMessageFormatter \
         --property print.key=true
