@@ -2,7 +2,7 @@ package io.ipolyzos.serdes
 
 import java.nio.charset.StandardCharsets
 
-import io.ipolyzos.models.UserDomain.{Account, Event, EventType, Subscription}
+import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithTypeAndAccountAndSubscription, Subscription}
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
 import scala.util.{Failure, Success, Try}
@@ -91,4 +91,23 @@ object UserDomainSerdes {
       }
     }
   }
+
+  object EventWithTypeAndAccountAndSubscriptionSerdes extends Serde[EventWithTypeAndAccountAndSubscription] {
+    override def serializer(): Serializer[EventWithTypeAndAccountAndSubscription] = new EventWithTypeAndAccountAndSubscriptionJsonSerializer()
+
+    override def deserializer(): Deserializer[EventWithTypeAndAccountAndSubscription] = new EventWithTypeAndAccountAndSubscriptionJsonDeSerializer()
+
+    class EventWithTypeAndAccountAndSubscriptionJsonSerializer() extends Serializer[EventWithTypeAndAccountAndSubscription] {
+      override def serialize(topic: String, data: EventWithTypeAndAccountAndSubscription): Array[Byte] = {
+        data.asJson.noSpaces.getBytes()
+      }
+    }
+
+    class EventWithTypeAndAccountAndSubscriptionJsonDeSerializer() extends Deserializer[EventWithTypeAndAccountAndSubscription] {
+      override def deserialize(topic: String, data: Array[Byte]): EventWithTypeAndAccountAndSubscription = {
+        decode[EventWithTypeAndAccountAndSubscription](new String(data, StandardCharsets.UTF_8)).right.get
+      }
+    }
+  }
+
 }
