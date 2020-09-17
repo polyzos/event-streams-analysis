@@ -4,7 +4,6 @@ import java.sql.{Date, Timestamp}
 
 object UserDomain {
 
-
   case class Account(id: Int, channel: String, dateOfBirth: Date, country: Option[String])
   case class Event(accountID: Int, eventTime: Timestamp, eventTypeID: Int)
   case class EventType(eventTypeID: Int, eventTypeName: String)

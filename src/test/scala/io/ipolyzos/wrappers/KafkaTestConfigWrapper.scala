@@ -9,6 +9,8 @@ trait KafkaTestConfigWrapper {
     val config = new Properties()
     config.setProperty(StreamsConfig.APPLICATION_ID_CONFIG, "testing")
     config.setProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    config.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "0")
+
     config
   }
 }

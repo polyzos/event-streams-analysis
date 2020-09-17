@@ -6,8 +6,8 @@ import io.ipolyzos.config.KafkaConfig
 import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EventWithTypeAndAccountAndSubscription, Subscription}
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.kstream.{GlobalKTable, Joined, Printed, Produced}
-import org.apache.kafka.streams.scala.{Serdes, StreamsBuilder}
+import org.apache.kafka.streams.kstream.{GlobalKTable, Joined, Materialized, Printed, Produced}
+import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, Serdes, StreamsBuilder}
 import org.apache.kafka.streams.scala.kstream.{Consumed, KStream, KTable}
 
 object UserActivityTopology {
@@ -50,10 +50,9 @@ object UserActivityTopology {
 
 
     val eventStream: KStream[String, Event] = streamsBuilder.stream(KafkaConfig.EVENTS_TOPIC)(eventsConsumed)
-    val accountsTable: KTable[String, Account] = streamsBuilder.table(KafkaConfig.ACCOUNTS_TOPIC)(accountConsumed)
-    val subscriptionsTable: KTable[String, Subscription] = streamsBuilder.table(KafkaConfig.SUBSCRIPTIONS_TOPIC)(subscriptionConsumed)
-
-    val eventTypesGlobalTable: GlobalKTable[String, EventType] = streamsBuilder.globalTable(KafkaConfig.EVENT_TYPES_TOPIC)(eventTypesConsumed)
+    val accountsTable: KTable[String, Account] = streamsBuilder.table(KafkaConfig.ACCOUNTS_TOPIC,  Materialized.as[String, Account, ByteArrayKeyValueStore]("accountStore"))(accountConsumed)
+    val subscriptionsTable: KTable[String, Subscription] = streamsBuilder.table[String, Subscription](KafkaConfig.SUBSCRIPTIONS_TOPIC, Materialized.as[String, Subscription, ByteArrayKeyValueStore]("subscriptionStore"))(subscriptionConsumed)
+    val eventTypesGlobalTable: GlobalKTable[String, EventType] = streamsBuilder.globalTable[String, EventType](KafkaConfig.EVENT_TYPES_TOPIC, Materialized.as[String, EventType, ByteArrayKeyValueStore]("eventTypeStore"))(eventTypesConsumed)
 
     // Join Events with Event Types
     val eventWithTypeStream: KStream[String, EventWithType] = eventStream.join(eventTypesGlobalTable)(
