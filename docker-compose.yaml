@@ -13,7 +13,7 @@ services:
       - "APP_ID=0"
       - "QUERY_SERVER_HOST=0.0.0.0"
       - "QUERY_SERVER_PORT=7010"
-      - "BOOTSTRAP_SERVERS=192.168.1.109:9092"
+      - "BOOTSTRAP_SERVERS=localhost:9092"
 
   instance_1:
     container_name: streams_instance1
@@ -27,7 +27,7 @@ services:
       - "APP_ID=1"
       - "QUERY_SERVER_HOST=0.0.0.0"
       - "QUERY_SERVER_PORT=7011"
-      - "BOOTSTRAP_SERVERS=192.168.1.109:9092"
+      - "BOOTSTRAP_SERVERS=localhost:9092"
 
   instance_2:
     container_name: streams_instance2
@@ -41,4 +41,4 @@ services:
       - "APP_ID=2"
       - "QUERY_SERVER_HOST=0.0.0.0"
       - "QUERY_SERVER_PORT=7012"
-      - "BOOTSTRAP_SERVERS=192.168.1.109:9092"
+      - "BOOTSTRAP_SERVERS=localhost:9092"
