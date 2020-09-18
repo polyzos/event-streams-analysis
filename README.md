@@ -1,3 +1,12 @@
 # User Activity Analysis
 ------------------------
-[] Perform error handling for when we have a transaction but can't match for join on the right side. How should it be handled? Create an empty record maybe?
+
+Demo project showing various features of Kafka Streams on user behavior data streams.
+
+Kafka Streams Features
+-----------------------
+1. KStreams, KTables & GlobalKTables
+2. Joins on all the above Streams
+3. Materialized Persistent State Stores
+4. Interactive Queries and Remote State Store communication using Akka Http
+5. Scaling-out using multiple instances
