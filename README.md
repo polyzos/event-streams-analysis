@@ -1,14 +1,15 @@
 # User Activity Analysis
 ------------------------
 
-Demo project showing various features of Kafka Streams on user behavior data streams.
+Demo project showcasing various features of Kafka Streams on user behavior data streams.
 
 Kafka Streams Features
 -----------------------
 1. KStreams, KTables & GlobalKTables
-2. Joins on all the above Streams
-3. Repartitioning
-4. Materialized Persistent State Stores
-5. Interactive Queries and Remote State Store communication using Akka Http
-6. Scaling-out using multiple instances
-7. Testing Kafka Streams
+2. Custom Serdes using the Circe library
+3. Joins on all the above Streams
+4. Repartitioning
+5. Materialized Persistent State Stores
+6. Interactive Queries and Remote State Store communication using Akka Http
+7. Scaling-out using multiple instances
+8. Testing Kafka Streams
