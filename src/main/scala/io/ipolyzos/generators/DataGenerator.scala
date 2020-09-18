@@ -75,7 +75,7 @@ object DataGenerator extends ProducerConfigWrapper {
 
     source.getLines().map { line =>
       val values = line.split(",")
-     EventType(values(0).toInt, values(1))
+      EventType(values(0).toInt, values(1))
     }.foreach { et =>
       val record = new ProducerRecord[String, EventType](KafkaConfig.EVENT_TYPES_TOPIC, et.eventTypeID.toString, et)
       producer.send(record, callback)
@@ -91,7 +91,6 @@ object DataGenerator extends ProducerConfigWrapper {
     val producer: KafkaProducer[String, Event] = initProducer[String, Event]("events-producer", classOf[StringSerializer], classOf[EventJsonSerializer])
 
     source.getLines().foreach { line =>
-      Thread.sleep(1000)
       val values = line.split(",")
       val event = Event(values(0).toInt, Timestamp.valueOf(values(1)), values(2).toInt)
       val record = new ProducerRecord[String, Event](KafkaConfig.EVENTS_TOPIC, event.accountID.toString, event)
@@ -101,6 +100,7 @@ object DataGenerator extends ProducerConfigWrapper {
     shutdownProducer(producer)
     source.close()
   }
+
   def main(args: Array[String]): Unit = {
     KafkaConfig.topics.foreach { topic =>
       AdminUtils.createTopic(topic)

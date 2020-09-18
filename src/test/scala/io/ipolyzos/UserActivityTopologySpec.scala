@@ -19,7 +19,6 @@ import org.apache.kafka.streams.{TestInputTopic, TopologyTestDriver}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-
 class UserActivityTopologySpec extends AnyFlatSpec
   with Matchers
   with TestDataUtils

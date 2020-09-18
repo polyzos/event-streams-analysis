@@ -5,8 +5,6 @@ import java.nio.charset.StandardCharsets
 import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithTypeAndAccountAndSubscription, Subscription}
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
-import scala.util.{Failure, Success, Try}
-
 object UserDomainSerdes {
 
   import io.circe.parser._
