@@ -10,7 +10,7 @@ import io.circe.parser.decode
 import io.ipolyzos.models.UserDomain.{Account, Subscription}
 import org.apache.kafka.streams.scala.Serdes
 import org.apache.kafka.streams.{KafkaStreams, KeyQueryMetadata, StoreQueryParameters}
-import org.apache.kafka.streams.state.{HostInfo, QueryableStoreTypes, ReadOnlyKeyValueStore}
+import org.apache.kafka.streams.state.{HostInfo, KeyValueIterator, QueryableStoreTypes, ReadOnlyKeyValueStore}
 
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
@@ -33,7 +33,20 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
     path("accounts") {
       pathEndOrSingleSlash {
         println(s"Requesting data for all account keys.")
-        complete(StatusCodes.OK)
+        val accounts: List[Account] = retrieveAllValues[Account]("accountStore").asScala.map(_.value).toList
+        if (accounts.isEmpty) {
+          complete(HttpEntity(
+            ContentTypes.`application/json`,
+            OnErrorResponse(StatusCodes.NotFound.toString(), "No accounts found").asJson.printWith(Printer.noSpaces).getBytes()
+          ))
+        } else {
+          complete(
+            HttpEntity(
+              ContentTypes.`application/json`,
+              accounts.asJson.printWith(Printer.noSpaces).getBytes()
+            )
+          )
+        }
       }
     } ~
     path("accounts" / IntNumber) { (accountID: Int) =>
@@ -78,7 +91,20 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
     path("subscriptions") {
       pathEndOrSingleSlash {
         println(s"Requesting data for all subscription keys.")
-        complete(StatusCodes.OK)
+        val subscriptions: List[Subscription] = retrieveAllValues[Subscription]("subscriptionStore").asScala.map(_.value).toList
+        if (subscriptions.isEmpty) {
+          complete(HttpEntity(
+            ContentTypes.`application/json`,
+            OnErrorResponse(StatusCodes.NotFound.toString(), "No accounts found").asJson.printWith(Printer.noSpaces).getBytes()
+          ))
+        } else {
+          complete(
+            HttpEntity(
+              ContentTypes.`application/json`,
+              subscriptions.asJson.printWith(Printer.noSpaces).getBytes()
+            )
+          )
+        }
       }
     } ~
       path("subscriptions" / IntNumber) { (subscriptionID: Int) =>
@@ -134,14 +160,25 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
   }
 
   private def retrieveValueForKey[T](key: String, storeName: String): T = {
-    val accountStore: ReadOnlyKeyValueStore[String, T] = streams.store(
+    val store: ReadOnlyKeyValueStore[String, T] = streams.store(
                 StoreQueryParameters.fromNameAndType(
                   storeName,
                   QueryableStoreTypes.keyValueStore[String, T]()
                 )
               )
 
-    accountStore.get(key)
+    store.get(key)
+  }
+
+  private def retrieveAllValues[T](storeName: String): KeyValueIterator[String, T] = {
+    val store: ReadOnlyKeyValueStore[String, T] = streams.store(
+      StoreQueryParameters.fromNameAndType(
+        storeName,
+        QueryableStoreTypes.keyValueStore[String, T]()
+      )
+    )
+
+    store.all()
   }
 
   private def retrieveValueForAccountRemote(metadata: KeyQueryMetadata, id: String): Future[Account] = {

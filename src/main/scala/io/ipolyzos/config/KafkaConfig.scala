@@ -14,6 +14,11 @@ object KafkaConfig {
   lazy val SUBSCRIPTIONS_TOPIC = "subscriptions"
   lazy val SUBSCRIPTIONS_REPARTITIONED_TOPIC = "subscriptions_rep"
 
+  lazy val ACCOUNT_STORE_NAME       = "accountStore"
+  lazy val SUBSCRIPTION_STORE_NAME  = "subscriptionStore"
+  lazy val EVENT_TYPE_STORE_NAME    = "eventTypeStore"
+
+
   lazy val topics = List(
     EVENTS_TOPIC,
     EVENT_TYPES_TOPIC,
