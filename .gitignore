@@ -20,3 +20,4 @@ project/plugins/project/
 src/main/resources/data
 .idea
 .DS_Store
+tmp

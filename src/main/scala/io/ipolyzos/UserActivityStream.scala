@@ -15,19 +15,16 @@ object UserActivityStream extends AsyncWrapper {
   private val stateStoreLocation = "tmp/state-store"
 
   def main(args: Array[String]): Unit = {
-    if (args.length != 3) {
-      println("AppID, Host and Port for the query server should be provided in the command-line")
-      System.exit(0)
+    val (appID, queryServerHost, queryServerPort) = {
+      if (args.length != 3) (0, "localhost", 7010)
+      else (args(0), args(1), args(2).toInt)
     }
 
-    val appID = args(0)
-    val queryServerHost = args(1)
-    val queryServerPort = args(2)
+
     val rpcEndpoint = s"$queryServerHost:$queryServerPort"
 
     val topology = UserActivityTopology.build()
 
-    println(s"Starting RPC server at '$rpcEndpoint'")
     val props = new Properties()
     props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationID)
     props.put(StreamsConfig.CLIENT_ID_CONFIG, "cgroup")
@@ -39,7 +36,7 @@ object UserActivityStream extends AsyncWrapper {
 
     val streams = new KafkaStreams(topology, props)
     streams.cleanUp()
-    val rpcServer = RPCServer(streams, new HostInfo(queryServerHost, queryServerPort.toInt))
+    val rpcServer = RPCServer(streams, new HostInfo(queryServerHost, queryServerPort))
     streams.setStateListener { (currentState, previousState) =>
       val isActive = currentState == KafkaStreams.State.RUNNING && previousState == KafkaStreams.State.REBALANCING
       rpcServer.setActive(isActive)
