@@ -35,7 +35,6 @@ object UserActivityStream extends AsyncWrapper {
     props.put(StreamsConfig.STATE_DIR_CONFIG, stateStoreLocation + s"$appID")
     props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "0")
     props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0")
-    //        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, "2")
     props.put(StreamsConfig.APPLICATION_SERVER_CONFIG, rpcEndpoint)
 
     val streams = new KafkaStreams(topology, props)

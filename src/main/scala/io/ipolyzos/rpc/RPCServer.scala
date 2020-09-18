@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, StatusCo
 import akka.util.ByteString
 import io.circe.Printer
 import io.circe.parser.decode
+import io.ipolyzos.models.OnErrorResponse
 import io.ipolyzos.models.UserDomain.{Account, Subscription}
 import org.apache.kafka.streams.scala.Serdes
 import org.apache.kafka.streams.{KafkaStreams, KeyQueryMetadata, StoreQueryParameters}
@@ -24,10 +25,8 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
   import io.ipolyzos.formatters.CustomFormatters._
 
   import scala.concurrent.duration._
-  import akka.http.scaladsl.server.Directives._
   import collection.JavaConverters._
-
-  case class OnErrorResponse(status: String, message: String)
+  import akka.http.scaladsl.server.Directives._
 
   private val accountRoutes =
     path("accounts") {
@@ -35,15 +34,17 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
         println(s"Requesting data for all account keys.")
         val accounts: List[Account] = retrieveAllValues[Account]("accountStore").asScala.map(_.value).toList
         if (accounts.isEmpty) {
-          complete(HttpEntity(
-            ContentTypes.`application/json`,
-            OnErrorResponse(StatusCodes.NotFound.toString(), "No accounts found").asJson.printWith(Printer.noSpaces).getBytes()
-          ))
+          complete(
+            HttpEntity(
+              ContentTypes.`application/json`,
+              formatOnErrorReponse("accounts")
+            )
+          )
         } else {
           complete(
             HttpEntity(
               ContentTypes.`application/json`,
-              accounts.asJson.printWith(Printer.noSpaces).getBytes()
+              accounts.asJson.noSpaces.getBytes()
             )
           )
         }
@@ -55,15 +56,17 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
         if (metadata.getActiveHost.host() == hostInfo.host() && metadata.getActiveHost.port() == hostInfo.port()) {
           val accountResult: Account = retrieveValueForKey[Account](accountID.toString, "accountStore")
           if (accountResult == null) {
-            complete(HttpEntity(
-              ContentTypes.`application/json`,
-              OnErrorResponse(StatusCodes.NotFound.toString(), s"Failed to retrieve value for account with id: $accountID").asJson.printWith(Printer.noSpaces).getBytes()
-            ))
+            complete(
+              HttpEntity(
+                ContentTypes.`application/json`,
+                formatOnErrorReponse("account", accountID)
+              )
+            )
           } else {
             complete(
               HttpEntity(
                 ContentTypes.`application/json`,
-                accountResult.asJson.printWith(Printer.noSpaces).getBytes()
+                accountResult.asJson.noSpaces.getBytes()
               )
             )
           }
@@ -71,10 +74,12 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
         } else {
           val accountResponse = Await.result(retrieveValueForAccountRemote(metadata, accountID.toString), 1 minutes)
           if (accountResponse == null) {
-            complete(HttpEntity(
-              ContentTypes.`application/json`,
-              OnErrorResponse(StatusCodes.NotFound.toString(), s"Failed to retrieve value for account with id: $accountID").asJson.printWith(Printer.noSpaces).getBytes()
-            ))
+            complete(
+              HttpEntity(
+                ContentTypes.`application/json`,
+                formatOnErrorReponse("account", accountID)
+              )
+            )
           } else {
             complete(
               HttpEntity(
@@ -93,10 +98,12 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
         println(s"Requesting data for all subscription keys.")
         val subscriptions: List[Subscription] = retrieveAllValues[Subscription]("subscriptionStore").asScala.map(_.value).toList
         if (subscriptions.isEmpty) {
-          complete(HttpEntity(
-            ContentTypes.`application/json`,
-            OnErrorResponse(StatusCodes.NotFound.toString(), "No accounts found").asJson.printWith(Printer.noSpaces).getBytes()
-          ))
+          complete(
+            HttpEntity(
+              ContentTypes.`application/json`,
+              formatOnErrorReponse("subscriptions")
+            )
+          )
         } else {
           complete(
             HttpEntity(
@@ -113,10 +120,12 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
           if (metadata.getActiveHost.host() == hostInfo.host() && metadata.getActiveHost.port() == hostInfo.port()) {
             val subscriptionResult = retrieveValueForKey[Subscription](subscriptionID.toString, "subscriptionStore")
             if (subscriptionResult == null) {
-              complete(HttpEntity(
-                ContentTypes.`application/json`,
-                OnErrorResponse(StatusCodes.NotFound.toString(), s"Failed to retrieve value for account with id: $subscriptionID").asJson.noSpaces.getBytes()
-              ))
+              complete(
+                HttpEntity(
+                  ContentTypes.`application/json`,
+                  formatOnErrorReponse("subscription", subscriptionID)
+                )
+              )
             } else {
               complete(
                 HttpEntity(
@@ -131,7 +140,7 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
             if (subscriptionResponse == null) {
               complete(HttpEntity(
                 ContentTypes.`application/json`,
-                OnErrorResponse(StatusCodes.NotFound.toString(), s"Failed to retrieve value for subscription with id: $subscriptionID").asJson.printWith(Printer.noSpaces).getBytes()
+                formatOnErrorReponse("subscription", subscriptionID)
               ))
             } else {
               complete(
@@ -201,5 +210,16 @@ case class RPCServer(private val streams: KafkaStreams, private val hostInfo: Ho
         account
       }
     }
+  }
+
+  private def formatOnErrorReponse(context: String, id: Int = -1): Array[Byte] = {
+    val response = if (id != 1) {
+      OnErrorResponse(StatusCodes.NotFound.toString(), s"Failed to retrieve value for $context with id: $id")
+    } else {
+      OnErrorResponse(StatusCodes.NotFound.toString(), s"No $context found.")
+    }
+    response.asJson
+      .printWith(Printer.noSpaces)
+      .getBytes()
   }
 }
