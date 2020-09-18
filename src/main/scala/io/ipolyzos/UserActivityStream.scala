@@ -1,20 +1,17 @@
 package io.ipolyzos
 
-import java.util.concurrent.{ExecutorService, Executors}
 import java.util.Properties
 
-import akka.actor.ActorSystem
 import io.ipolyzos.config.KafkaConfig
-import io.ipolyzos.models.UserDomain.Account
 import io.ipolyzos.rpc.RPCServer
 import io.ipolyzos.topology.UserActivityTopology
-import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.state.{HostInfo, QueryableStoreTypes, ReadOnlyKeyValueStore}
-import org.apache.kafka.streams.{KafkaStreams, StoreQueryParameters, StreamsConfig}
+import io.ipolyzos.wrappers.AsyncWrapper
+import org.apache.kafka.streams.state.HostInfo
+import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-object UserActivityStream {
+object UserActivityStream extends AsyncWrapper {
   private val applicationID = "user-activity-stream"
 
   //private val stateStoreName = "top3"
@@ -22,10 +19,6 @@ object UserActivityStream {
   private val queryServerHost = "localhost"
   private val queryServerPort = 701
 
-  private val executorService: ExecutorService = Executors.newFixedThreadPool(3)
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(executorService)
-
-  implicit val system: ActorSystem = ActorSystem("SampleServer")
 
   def main(args: Array[String]): Unit = {
     (0 until 3).foreach { i =>
