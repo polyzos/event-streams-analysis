@@ -19,18 +19,18 @@ object UserDomain {
 
   case class EventWithType(accountID: Int, eventTime: Timestamp, eventTypeName: String)
   case class EventWithTypeAndAccount(accountID: Int, channel: String, dateOfBirth: Date, country: Option[String], eventTime: Timestamp, eventTypeName: String)
-  case class EventWithTypeAndAccountAndSubscription(channel: String,
-                                                    dateOfBirth: Date,
-                                                    country: Option[String],
-                                                    eventTime: Timestamp,
-                                                    eventTypeName: String,
-                                                    subscriptionID: Int,
-                                                    accountID: Int,
-                                                    product: String,
-                                                    subscriptionStartDate: Date,
-                                                    subscriptionEndDate: Date,
-                                                    mrr: Option[Int],
-                                                    quantity: Option[Int],
-                                                    units: Option[Int],
-                                                    billPeriodMonths: Int)
+  case class EnrichedEvent(channel: String,
+                           dateOfBirth: Date,
+                           country: Option[String],
+                           eventTime: Timestamp,
+                           eventTypeName: String,
+                           subscriptionID: Int,
+                           accountID: Int,
+                           product: String,
+                           subscriptionStartDate: Date,
+                           subscriptionEndDate: Date,
+                           mrr: Option[Int],
+                           quantity: Option[Int],
+                           units: Option[Int],
+                           billPeriodMonths: Int)
 }

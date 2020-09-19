@@ -7,8 +7,6 @@ services:
     network_mode: "host"
     ports:
       - "7010:7010"
-      - "7011:7011"
-      - "7012:7012"
     environment:
       - "APP_ID=0"
       - "QUERY_SERVER_HOST=0.0.0.0"
@@ -20,9 +18,7 @@ services:
     image: streams
     network_mode: "host"
     ports:
-      - "7010:7010"
       - "7011:7011"
-      - "7012:7012"
     environment:
       - "APP_ID=1"
       - "QUERY_SERVER_HOST=0.0.0.0"
@@ -34,8 +30,6 @@ services:
     image: streams
     network_mode: "host"
     ports:
-      - "7010:7010"
-      - "7011:7011"
       - "7012:7012"
     environment:
       - "APP_ID=2"

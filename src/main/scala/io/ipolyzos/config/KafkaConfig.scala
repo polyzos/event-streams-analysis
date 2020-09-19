@@ -9,6 +9,7 @@ object KafkaConfig {
 
   // Available Topics
   lazy val EVENTS_TOPIC = "events"
+  lazy val ENRICHED_EVENTS_TOPIC = "enriched_events"
   lazy val EVENT_TYPES_TOPIC = "event_types"
   lazy val ACCOUNTS_TOPIC = "accounts"
   lazy val SUBSCRIPTIONS_TOPIC = "subscriptions"

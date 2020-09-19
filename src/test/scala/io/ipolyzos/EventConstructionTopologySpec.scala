@@ -4,13 +4,13 @@ import java.sql.{Date, Timestamp}
 
 import io.ipolyzos.config.KafkaConfig
 import io.ipolyzos.models.UserDomain
-import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EventWithTypeAndAccountAndSubscription, Subscription}
+import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EnrichedEvent, Subscription}
 import io.ipolyzos.serdes.UserDomainSerdes.AccountSerdes.AccountJsonSerializer
 import io.ipolyzos.serdes.UserDomainSerdes.EventSerdes.EventJsonSerializer
 import io.ipolyzos.serdes.UserDomainSerdes.EventTypeSerdes.EventTypeJsonSerializer
 import io.ipolyzos.serdes.UserDomainSerdes.EventWithTypeAndAccountAndSubscriptionSerdes.EventWithTypeAndAccountAndSubscriptionJsonDeSerializer
 import io.ipolyzos.serdes.UserDomainSerdes.SubscriptionSerdes.SubscriptionJsonSerializer
-import io.ipolyzos.topology.UserActivityTopology
+import io.ipolyzos.topology.EventConstructionTopology
 import io.ipolyzos.utils.TestDataUtils
 import io.ipolyzos.wrappers.KafkaTestConfigWrapper
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
@@ -19,14 +19,14 @@ import org.apache.kafka.streams.{TestInputTopic, TopologyTestDriver}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class UserActivityTopologySpec extends AnyFlatSpec
+class EventConstructionTopologySpec extends AnyFlatSpec
   with Matchers
   with TestDataUtils
   with KafkaTestConfigWrapper {
   import collection.JavaConverters._
 
   "UserActivityTopology" should "should join all topics" in {
-    val driver: TopologyTestDriver = new TopologyTestDriver(UserActivityTopology.build(), getConfig())
+    val driver: TopologyTestDriver = new TopologyTestDriver(EventConstructionTopology.build(), getConfig())
 
     val accountsTopic: TestInputTopic[String, UserDomain.Account] = driver.createInputTopic(KafkaConfig.ACCOUNTS_TOPIC, new StringSerializer(), new AccountJsonSerializer())
     val subscriptionsTopic: TestInputTopic[String, UserDomain.Subscription] = driver.createInputTopic(KafkaConfig.SUBSCRIPTIONS_TOPIC,  new StringSerializer(), new SubscriptionJsonSerializer())
@@ -47,7 +47,7 @@ class UserActivityTopologySpec extends AnyFlatSpec
 
     val eventWithType = EventWithType(event.accountID, event.eventTime, eventType.eventTypeName)
     val eventWithTypeAndAccount = EventWithTypeAndAccount(2,"appstore1", Date.valueOf("1940-10-05"), Some("AU"), eventWithType.eventTime, eventWithType.eventTypeName)
-    val eventWithTypeAndAccountAndSubscription = EventWithTypeAndAccountAndSubscription(
+    val eventWithTypeAndAccountAndSubscription = EnrichedEvent(
       eventWithTypeAndAccount.channel,
       eventWithTypeAndAccount.dateOfBirth,
       eventWithTypeAndAccount.country,
@@ -73,7 +73,7 @@ class UserActivityTopologySpec extends AnyFlatSpec
   }
 
   "UserActivityTopology" should "should process all events, perform joins and construct correct output" in {
-    val driver: TopologyTestDriver = new TopologyTestDriver(UserActivityTopology.build(), getConfig())
+    val driver: TopologyTestDriver = new TopologyTestDriver(EventConstructionTopology.build(), getConfig())
 
     val accountsTopic: TestInputTopic[String, UserDomain.Account] = driver.createInputTopic(KafkaConfig.ACCOUNTS_TOPIC, new StringSerializer(), new AccountJsonSerializer())
     val subscriptionsTopic: TestInputTopic[String, UserDomain.Subscription] = driver.createInputTopic(KafkaConfig.SUBSCRIPTIONS_TOPIC,  new StringSerializer(), new SubscriptionJsonSerializer())
@@ -98,7 +98,7 @@ class UserActivityTopologySpec extends AnyFlatSpec
   }
 
   "accounts state store" should "update correctly" in {
-    val driver: TopologyTestDriver = new TopologyTestDriver(UserActivityTopology.build(), getConfig())
+    val driver: TopologyTestDriver = new TopologyTestDriver(EventConstructionTopology.build(), getConfig())
     val accountsTopic: TestInputTopic[String, UserDomain.Account] = driver.createInputTopic(KafkaConfig.ACCOUNTS_TOPIC, new StringSerializer(), new AccountJsonSerializer())
     accountsTopic.pipeKeyValueList(accounts.asJava)
 
@@ -112,7 +112,7 @@ class UserActivityTopologySpec extends AnyFlatSpec
 
 
   "subscriptions state store" should "update correctly" in {
-    val driver: TopologyTestDriver = new TopologyTestDriver(UserActivityTopology.build(), getConfig())
+    val driver: TopologyTestDriver = new TopologyTestDriver(EventConstructionTopology.build(), getConfig())
     val subscriptionsTopic: TestInputTopic[String, UserDomain.Subscription] = driver.createInputTopic(KafkaConfig.SUBSCRIPTIONS_TOPIC,  new StringSerializer(), new SubscriptionJsonSerializer())
 
     subscriptionsTopic.pipeKeyValueList(subscriptions.asJava)

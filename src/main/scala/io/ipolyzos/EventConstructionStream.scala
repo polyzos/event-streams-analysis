@@ -4,14 +4,14 @@ import java.util.Properties
 
 import io.ipolyzos.config.KafkaConfig
 import io.ipolyzos.rpc.RPCServer
-import io.ipolyzos.topology.UserActivityTopology
+import io.ipolyzos.topology.EventConstructionTopology
 import io.ipolyzos.wrappers.AsyncWrapper
 import org.apache.kafka.streams.state.HostInfo
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 
 import scala.util.Try
 
-object UserActivityStream extends AsyncWrapper {
+object EventConstructionStream extends AsyncWrapper {
   private val applicationID = "user-activity-stream"
 
   private val stateStoreLocation = "tmp/state-store"
@@ -24,7 +24,7 @@ object UserActivityStream extends AsyncWrapper {
 
     val rpcEndpoint = s"$queryServerHost:$queryServerPort"
 
-    val topology = UserActivityTopology.build()
+    val topology = EventConstructionTopology.build()
 
     val props = new Properties()
     props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationID)

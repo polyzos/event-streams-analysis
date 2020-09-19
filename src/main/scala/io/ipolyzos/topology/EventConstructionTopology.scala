@@ -3,7 +3,7 @@ package io.ipolyzos.topology
 import java.nio.charset.StandardCharsets
 
 import io.ipolyzos.config.KafkaConfig
-import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EventWithTypeAndAccountAndSubscription, Subscription}
+import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EnrichedEvent, Subscription}
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.{GlobalKTable, Joined, Materialized, Printed, Produced}
@@ -11,7 +11,7 @@ import org.apache.kafka.streams.scala.{Serdes, StreamsBuilder}
 import org.apache.kafka.streams.scala.kstream.{Consumed, KStream, KTable}
 import org.apache.kafka.streams.state.Stores
 
-object UserActivityTopology {
+object EventConstructionTopology {
   import io.circe.parser._
   import io.circe.syntax._
   import io.circe.generic.auto._
@@ -39,8 +39,8 @@ object UserActivityTopology {
     )
 
     implicit val eventWithTypeAndAccountAndSubscriptionSerdes = Serdes.fromFn(
-      (_: String, data: EventWithTypeAndAccountAndSubscription) =>  data.asJson.noSpaces.getBytes(),
-      (_: String, data: Array[Byte]) => decode[EventWithTypeAndAccountAndSubscription](new String(data, StandardCharsets.UTF_8)).right.toOption
+      (_: String, data: EnrichedEvent) =>  data.asJson.noSpaces.getBytes(),
+      (_: String, data: Array[Byte]) => decode[EnrichedEvent](new String(data, StandardCharsets.UTF_8)).right.toOption
     )
 
 
@@ -102,8 +102,8 @@ object UserActivityTopology {
 
 
     // Join Events, Event Types and Accounts with Subscriptions - Final Event
-    val eventWithTypeAndAccountAndSubscriptionStream: KStream[String, EventWithTypeAndAccountAndSubscription] = eventWithTypeAndAccountStream.join(subscriptionsRepartitionedTable){ (eventWithTypeAndAccount, subscription) =>
-      EventWithTypeAndAccountAndSubscription(
+    val eventWithTypeAndAccountAndSubscriptionStream: KStream[String, EnrichedEvent] = eventWithTypeAndAccountStream.join(subscriptionsRepartitionedTable){ (eventWithTypeAndAccount, subscription) =>
+      EnrichedEvent(
         eventWithTypeAndAccount.channel,
         eventWithTypeAndAccount.dateOfBirth,
         eventWithTypeAndAccount.country,
@@ -122,9 +122,9 @@ object UserActivityTopology {
     }(Joined.`with`(stringSerdes, eventWithTypeAndAccountSerdes, subscriptionSerdes))
 
     eventWithTypeAndAccountAndSubscriptionStream.print(
-      Printed.toSysOut[String, EventWithTypeAndAccountAndSubscription].withLabel("enriched-event"))
+      Printed.toSysOut[String, EnrichedEvent].withLabel("enriched-event"))
 
-    eventWithTypeAndAccountAndSubscriptionStream.to("enriched_events")(Produced.`with`(stringSerdes, eventWithTypeAndAccountAndSubscriptionSerdes))
+    eventWithTypeAndAccountAndSubscriptionStream.to(KafkaConfig.ENRICHED_EVENTS_TOPIC)(Produced.`with`(stringSerdes, eventWithTypeAndAccountAndSubscriptionSerdes))
     streamsBuilder.build()
   }
 }

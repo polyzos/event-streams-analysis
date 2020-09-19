@@ -2,7 +2,7 @@ package io.ipolyzos.serdes
 
 import java.nio.charset.StandardCharsets
 
-import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithTypeAndAccountAndSubscription, Subscription}
+import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EnrichedEvent, Subscription}
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
 object UserDomainSerdes {
@@ -90,20 +90,20 @@ object UserDomainSerdes {
     }
   }
 
-  object EventWithTypeAndAccountAndSubscriptionSerdes extends Serde[EventWithTypeAndAccountAndSubscription] {
-    override def serializer(): Serializer[EventWithTypeAndAccountAndSubscription] = new EventWithTypeAndAccountAndSubscriptionJsonSerializer()
+  object EventWithTypeAndAccountAndSubscriptionSerdes extends Serde[EnrichedEvent] {
+    override def serializer(): Serializer[EnrichedEvent] = new EventWithTypeAndAccountAndSubscriptionJsonSerializer()
 
-    override def deserializer(): Deserializer[EventWithTypeAndAccountAndSubscription] = new EventWithTypeAndAccountAndSubscriptionJsonDeSerializer()
+    override def deserializer(): Deserializer[EnrichedEvent] = new EventWithTypeAndAccountAndSubscriptionJsonDeSerializer()
 
-    class EventWithTypeAndAccountAndSubscriptionJsonSerializer() extends Serializer[EventWithTypeAndAccountAndSubscription] {
-      override def serialize(topic: String, data: EventWithTypeAndAccountAndSubscription): Array[Byte] = {
+    class EventWithTypeAndAccountAndSubscriptionJsonSerializer() extends Serializer[EnrichedEvent] {
+      override def serialize(topic: String, data: EnrichedEvent): Array[Byte] = {
         data.asJson.noSpaces.getBytes()
       }
     }
 
-    class EventWithTypeAndAccountAndSubscriptionJsonDeSerializer() extends Deserializer[EventWithTypeAndAccountAndSubscription] {
-      override def deserialize(topic: String, data: Array[Byte]): EventWithTypeAndAccountAndSubscription = {
-        decode[EventWithTypeAndAccountAndSubscription](new String(data, StandardCharsets.UTF_8)).right.get
+    class EventWithTypeAndAccountAndSubscriptionJsonDeSerializer() extends Deserializer[EnrichedEvent] {
+      override def deserialize(topic: String, data: Array[Byte]): EnrichedEvent = {
+        decode[EnrichedEvent](new String(data, StandardCharsets.UTF_8)).right.get
       }
     }
   }

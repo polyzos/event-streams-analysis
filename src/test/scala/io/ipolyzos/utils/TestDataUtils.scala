@@ -2,7 +2,7 @@ package io.ipolyzos.utils
 
 import java.sql.{Date, Timestamp}
 
-import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EventWithTypeAndAccountAndSubscription, Subscription}
+import io.ipolyzos.models.UserDomain.{Account, Event, EventType, EventWithType, EventWithTypeAndAccount, EnrichedEvent, Subscription}
 import org.apache.kafka.streams.KeyValue
 
 trait TestDataUtils {
@@ -60,7 +60,7 @@ trait TestDataUtils {
     Event(6,Timestamp.valueOf("2020-01-01 00:10:07"),3)
   ).map(e => new KeyValue(e.accountID.toString, e))
 
-  def createConstructedEvents(): List[EventWithTypeAndAccountAndSubscription] = {
+  def createConstructedEvents(): List[EnrichedEvent] = {
     events.map { event =>
       val e = event.value
       val et = eventTypes.map(_.value).filter(_.eventTypeID == e.eventTypeID).head
@@ -69,7 +69,7 @@ trait TestDataUtils {
 
       val eventWithType = EventWithType(e.accountID, e.eventTime, et.eventTypeName)
       val eventWithTypeAndAccount = EventWithTypeAndAccount(account.id, account.channel, account.dateOfBirth, account.country, eventWithType.eventTime, eventWithType.eventTypeName)
-      EventWithTypeAndAccountAndSubscription(
+      EnrichedEvent(
         eventWithTypeAndAccount.channel,
         eventWithTypeAndAccount.dateOfBirth,
         eventWithTypeAndAccount.country,
