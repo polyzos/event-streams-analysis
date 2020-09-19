@@ -18,7 +18,7 @@ import scala.util.Try
 
 object DataGenerator extends ProducerConfigWrapper {
 
-  private lazy val dataDir = "src/main/resources/data"
+  private lazy val dataDir = "commons/src/main/resources/data"
 
   def populateAccountsData(): Unit = {
     val source = Source.fromFile(dataDir + "/accounts.csv")
@@ -106,10 +106,10 @@ object DataGenerator extends ProducerConfigWrapper {
       AdminUtils.createTopic(topic)
     }
 
-    populateAccountsData()
-    populateSubscriptions()
-    populateEventTypesData()
-    Thread.sleep(10000)
+//    populateAccountsData()
+//    populateSubscriptions()
+//    populateEventTypesData()
+//    Thread.sleep(10000)
     println("-" * 100)
     populateEventsData()
   }

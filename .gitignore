@@ -21,3 +21,4 @@ src/main/resources/data
 .idea
 .DS_Store
 tmp
+commons/src/main/resources/data

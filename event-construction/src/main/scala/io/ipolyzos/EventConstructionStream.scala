@@ -18,9 +18,9 @@ object EventConstructionStream extends AsyncWrapper {
 
   def main(args: Array[String]): Unit = {
     val appID = Try(System.getenv("APP_ID")).getOrElse("0")
-    val queryServerHost = Try(System.getenv("QUERY_SERVER_HOST")).getOrElse("localhost")
-    val queryServerPort = Try(System.getenv("QUERY_SERVER_PORT").toInt).getOrElse(7010)
-    val bootstrapServers = Try(System.getenv("BOOTSTRAP_SERVERS")).getOrElse(KafkaConfig.bootstrapServers)
+    val queryServerHost = sys.env.getOrElse("QUERY_SERVER_HOST", "localhost")
+    val queryServerPort = sys.env.get("QUERY_SERVER_PORT").map(_.toInt).getOrElse(7010)
+    val bootstrapServers = sys.env.getOrElse("BOOTSTRAP_SERVERS", KafkaConfig.bootstrapServers)
 
     val rpcEndpoint = s"$queryServerHost:$queryServerPort"
 

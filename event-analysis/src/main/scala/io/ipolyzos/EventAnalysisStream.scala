@@ -11,12 +11,10 @@ import scala.util.Try
 object EventAnalysisStream {
   def main(args: Array[String]): Unit = {
     val appID = Try(System.getenv("APP_ID")).getOrElse("0")
-    val bootstrapServers = if(System.getenv("BOOTSTRAP_SERVERS") == null) KafkaConfig.bootstrapServers else System.getenv("BOOTSTRAP_SERVERS")
-
+    val bootstrapServers = sys.env.getOrElse("BOOTSTRAP_SERVERS", KafkaConfig.bootstrapServers)
 
     val topology = EventAnalysisTopology.build()
 
-    println(bootstrapServers)
     val props = new Properties()
     props.put(StreamsConfig.APPLICATION_ID_CONFIG, appID + UUID.randomUUID())
     props.put(StreamsConfig.CLIENT_ID_CONFIG, "cgroup_lvl2" + UUID.randomUUID())
