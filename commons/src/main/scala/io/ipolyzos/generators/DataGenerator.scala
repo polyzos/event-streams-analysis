@@ -106,11 +106,11 @@ object DataGenerator extends ProducerConfigWrapper {
       AdminUtils.createTopic(topic)
     }
 
-//    populateAccountsData()
-//    populateSubscriptions()
-//    populateEventTypesData()
+    populateAccountsData()
+    populateSubscriptions()
+    populateEventTypesData()
 //    Thread.sleep(10000)
-    println("-" * 100)
-    populateEventsData()
+//    println("-" * 100)
+//    populateEventsData()
   }
 }

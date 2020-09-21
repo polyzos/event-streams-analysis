@@ -31,8 +31,8 @@ lazy val kafkaStreamsTest = "org.apache.kafka"   %  "kafka-streams-test-utils"  
 lazy val akkaHttp         = "com.typesafe.akka" %%  "akka-http"                 % AkkaHttpVersion
 lazy val akkaStreams      = "com.typesafe.akka" %%  "akka-stream"               % AkkaVersion
 
-lazy val sparkSQL         = "org.apache.spark"  %%  "spark-sql"                 % sparkVersion        % "provided"
-lazy val sparkSQLKafka    = "org.apache.spark"  %%  "spark-sql-kafka-0-10"      % sparkVersion        % "provided"
+lazy val sparkSQL         = "org.apache.spark"  %%  "spark-sql"                 % sparkVersion        //% "provided"
+lazy val sparkSQLKafka    = "org.apache.spark"  %%  "spark-sql-kafka-0-10"      % sparkVersion        //% "provided"
 lazy val deltaLake        = "io.delta"          %%  "delta-core"                % deltaLakeVersion
 
 val commonsDependencies   = Seq(scalaTest)
@@ -78,4 +78,4 @@ lazy val datalakeIngestion = (project in file("datalake-ingestion"))
   .settings(
     name := "datalake-ingestion",
     libraryDependencies ++= sparkDependencies
-  )
+  )  .dependsOn(commons)
