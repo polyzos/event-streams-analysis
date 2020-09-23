@@ -1,4 +1,4 @@
-name := "user-activity-analysis"
+name := "event-stream-analysis"
 
 val common = Seq(
   version := "1.0.0",
