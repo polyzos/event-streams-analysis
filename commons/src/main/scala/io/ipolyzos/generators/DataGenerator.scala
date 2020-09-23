@@ -110,7 +110,7 @@ object DataGenerator extends ProducerConfigWrapper {
     populateSubscriptions()
     populateEventTypesData()
 //    Thread.sleep(10000)
-//    println("-" * 100)
-//    populateEventsData()
+    println("-" * 100)
+    populateEventsData()
   }
 }

@@ -4,7 +4,6 @@ services:
   instance_0:
     container_name: streams_instance0
     image: streams
-    network_mode: "host"
     ports:
       - "7010:7010"
     environment:
@@ -16,7 +15,6 @@ services:
   instance_1:
     container_name: streams_instance1
     image: streams
-    network_mode: "host"
     ports:
       - "7011:7011"
     environment:
@@ -28,7 +26,6 @@ services:
   instance_2:
     container_name: streams_instance2
     image: streams
-    network_mode: "host"
     ports:
       - "7012:7012"
     environment:
